@@ -1,0 +1,113 @@
+//TASK 2 DATA COMPRESSION TOOL
+
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+char* rle_encode(const char* input) {
+    if (input == NULL) {
+        return NULL;
+    }
+
+    int len = strlen(input);
+    if (len == 0) {
+        char* empty_str = (char*)malloc(1);
+        if (empty_str != NULL) {
+            empty_str[0] = '\0';
+        }
+        return empty_str;
+    }
+
+    int encoded_len = 0;
+    char* encoded = (char*)malloc(len * 2);
+
+    if (encoded == NULL) {
+        return NULL;
+    }
+
+    for (int i = 0; i < len; i++) {
+        char current_char = input[i];
+        int count = 1;
+
+        while (i + 1 < len && input[i] == input[i + 1]) {
+            count++;
+            i++;
+        }
+
+        encoded[encoded_len++] = current_char;
+
+        if (count > 1)
+        {
+            char count_str[10];
+            sprintf(count_str, "%d", count);
+            for (int j = 0; count_str[j] != '\0'; j++)
+            {
+               encoded[encoded_len++] = count_str[j];
+            }
+        }
+    }
+    encoded[encoded_len] = '\0';
+    return encoded;
+}
+
+char* rle_decode(const char* encoded) {
+    if (encoded == NULL) {
+        return NULL;
+    }
+
+    int len = strlen(encoded);
+    if (len == 0) {
+        char* empty_str = (char*)malloc(1);
+        if (empty_str != NULL) {
+           empty_str[0] = '\0';
+        }
+        return empty_str;
+    }
+
+    int decoded_len = 0;
+    char* decoded = (char*)malloc(len * 2);
+
+    if (decoded == NULL) {
+        return NULL;
+    }
+
+    for (int i = 0; i < len; i++) {
+        char current_char = encoded[i];
+        i++;
+
+        int count = 0;
+        while (i < len && encoded[i] >= '0' && encoded[i] <= '9') {
+          count = count * 10 + (encoded[i] - '0');
+          i++;
+        }
+        if (count == 0) {
+           count = 1;
+           i--;
+        }
+        for (int j = 0; j < count; j++) {
+            decoded[decoded_len++] = current_char;
+        }
+    }
+
+    decoded[decoded_len] = '\0';
+    return decoded;
+}
+
+int main() {
+    char input[] = "AAABBBCCDAA";
+    printf("Original string: %s\n", input);
+
+    char* encoded = rle_encode(input);
+    if (encoded != NULL) {
+        printf("Encoded string: %s\n", encoded);
+
+        char* decoded = rle_decode(encoded);
+        if(decoded != NULL)
+        {
+            printf("Decoded string: %s\n", decoded);
+            free(decoded);
+        }
+        free(encoded);
+    }
+    return 0;
+}
